@@ -89,8 +89,7 @@ jobs:
       matrix:
         include:
           - os: "ubuntu-${{inputs.ubuntu-version}}"
-          - os: windows-2022
-            msvs-version: "2022"
+          - os: windows-latest
           - os: macos-latest
     steps:
       - name: Checkout repository
@@ -102,8 +101,6 @@ jobs:
           node-version: ${{inputs.node-version}}
       - name: Install dependencies
         run: npm i --omit peer --omit optional --ignore-scripts
-        env:
-          npm_config_msvs_version: ${{matrix.msvs-version}}
       - name: Regenerate parser
         if: ${{inputs.generate}}
         shell: bash
@@ -115,14 +112,7 @@ jobs:
             cd - > /dev/null
           done < <(find . -name grammar.js -not -path './node_modules/*' -not -path './.build/*')
       - name: Build x64 binary
-        if: runner.os != 'Windows'
         run: npm x -- prebuildify --arch x64
-      - name: Build x64 binary (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: npm x -- prebuildify --arch x64 -t 20.9.0
-        env:
-          npm_config_msvs_version: ${{matrix.msvs-version}}
       - name: Set up cross-compilation
         if: runner.os == 'Linux'
         run: |-
